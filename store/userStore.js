@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export const useUserStore = create(
+export const useUserStore = create()(
   persist(
     (set) => ({
       uid: null,
       name: null,
       email: null,
       role: "normaluser",
-      image: null, // ✅ add image
+      image: null,
 
       setUser: (user) => set(user),
       clearUser: () =>
@@ -21,7 +21,7 @@ export const useUserStore = create(
         }),
     }),
     {
-      name: "user-storage", // key in localStorage
+      name: "user-storage", // stored in localStorage
     }
   )
 );

@@ -12,6 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import Link from "next/link";
 
 const Topbar = () => {
   const { uid, email, image, setUser, clearUser } = useUserStore();
@@ -20,13 +21,6 @@ const Topbar = () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-
-      setUser({
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        image: user.photoURL,
-      });
 
       await fetch("/api/users", {
         method: "POST",
@@ -38,6 +32,19 @@ const Topbar = () => {
           image: user.photoURL,
         }),
       });
+
+      const res = await fetch(`/api/users?email=${user.email}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setUser({
+          uid: data.user.uid,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role,
+          image: data.user.image,
+        });
+      }
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -62,9 +69,11 @@ const Topbar = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">H</span>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
-                HostelFinder
-              </span>
+              <Link href={"/"}>
+                <span className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+                  HostelFinder
+                </span>
+              </Link>
             </div>
 
             {/* Desktop actions */}
@@ -77,7 +86,9 @@ const Topbar = () => {
                       {email ? email[0].toUpperCase() : "?"}
                     </AvatarFallback>
                   </Avatar>
-                  <UserPen size={18} />
+                  <Link href={`/Editprofile`}>
+                    <UserPen size={18} />
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-2 rounded-full hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105"
@@ -118,7 +129,10 @@ const Topbar = () => {
                       </Avatar>
                       <p className="font-medium">{email}</p>
                       <button className="flex items-center gap-2 text-gray-700 hover:text-rose-600">
-                        <UserPen size={18} /> Edit Profile
+                        <Link href={`/Editprofile`}>
+                          <UserPen size={18} />
+                        </Link>
+                        Edit Profile
                       </button>
                       <button
                         onClick={handleLogout}
