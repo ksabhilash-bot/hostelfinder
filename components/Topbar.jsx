@@ -160,7 +160,7 @@ const Topbar = () => {
                         onClick={handleLogin}
                         className="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-6 py-2 rounded-full hover:from-rose-600 hover:to-pink-700 transition-all"
                       >
-                        Sign In with Google
+                        {loggin ? "Please wait..." : "Sign In with Google"}
                       </button>
                     </div>
                   )}

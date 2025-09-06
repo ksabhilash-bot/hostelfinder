@@ -9,10 +9,12 @@ import { useUserStore } from "@/store/userStore";
 import { X, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { LoaderOne } from "@/components/ui/loader";
 
 export default function CreateHostelPage() {
   const { id } = useUserStore();
   const router = useRouter();
+  const [loader, setLoader] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -34,7 +36,7 @@ export default function CreateHostelPage() {
   const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
+    setLoader(true);
     setMessage("Uploading images...");
     const formData = new FormData();
 
@@ -58,6 +60,8 @@ export default function CreateHostelPage() {
     } catch (error) {
       console.error(error);
       setMessage("Error uploading images");
+    } finally {
+      setLoader(false);
     }
   };
 
@@ -106,9 +110,9 @@ export default function CreateHostelPage() {
 
       if (data.success) {
         setMessage("Hostel created successfully!");
-        toast("added successfully");
+        toast("Added successfully");
         setTimeout(() => {
-          router.push("/hostels/listhotels");
+          router.push("/hostels/listhostels");
         }, 2000);
       } else {
         setMessage(data.message || "Failed to create hostel");
@@ -122,7 +126,13 @@ export default function CreateHostelPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-white p-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-rose-50 to-white p-4">
+      {/* Loader Overlay */}
+      {loader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/45">
+          <LoaderOne />
+        </div>
+      )}
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl border border-rose-100 overflow-hidden mb-6">
@@ -147,7 +157,11 @@ export default function CreateHostelPage() {
         <div className="bg-white rounded-2xl shadow-xl border border-rose-100 overflow-hidden">
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Basic Information */}
+              <div>
+                <span className="text-rose-600">
+                  Please upload all images first.
+                </span>
+              </div>
               <div className="space-y-6">
                 <Label htmlFor="name">Hostel Name *</Label>
                 <Input
