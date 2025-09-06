@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 const Topbar = () => {
   const { uid, email, image, setUser, clearUser } = useUserStore();
   const [loggin, setloggin] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false); // State to control Sheet
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -51,6 +52,7 @@ const Topbar = () => {
         });
       }
       setloggin(false);
+      setIsSheetOpen(false); // Close Sheet after login
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -61,6 +63,7 @@ const Topbar = () => {
       await signOut(auth);
       clearUser();
       router.push("/");
+      setIsSheetOpen(false); // Close Sheet after logout
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -118,7 +121,7 @@ const Topbar = () => {
 
             {/* Mobile Hamburger Menu */}
             <div className="md:hidden">
-              <Sheet>
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
                   <button className="p-2 rounded-md hover:bg-gray-100">
                     <Menu className="hover:text-rose-500" size={24} />
@@ -138,14 +141,16 @@ const Topbar = () => {
                         </AvatarFallback>
                       </Avatar>
                       <p className="font-medium">{email}</p>
-                      <button className="flex items-center gap-2 text-gray-700 hover:text-rose-600">
+                      <button
+                        onClick={() => setIsSheetOpen(false)} // Close Sheet on click
+                        className="flex items-center gap-2 text-gray-700 hover:text-rose-600"
+                      >
                         <Link href={`/Editprofile`}>
                           <UserPen
                             size={22}
                             className="hover:text-rose-500 hover:scale-125 transition-transform duration-200"
                           />
                         </Link>
-                        Edit Profile
                       </button>
                       <button
                         onClick={handleLogout}

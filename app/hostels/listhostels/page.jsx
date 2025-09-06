@@ -13,6 +13,9 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { LoaderOne } from "@/components/ui/loader";
 
 // Animation variants for cards
 const cardVariants = {
@@ -31,8 +34,56 @@ const MyHostelsPage = () => {
   const { id } = useUserStore();
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
+  const [loader, setLoader] = useState(false);
+
+  // Function to fetch hostels
+  const fetchMyHostels = async () => {
+    try {
+      setLoader(true);
+      const res = await fetch(`/api/hostels?id=${id}`);
+      const data = await res.json();
+      if (data.success) {
+        setHostels(data.hostels);
+      } else {
+        toast.error(data.message || "Failed to fetch hostels");
+      }
+    } catch (error) {
+      console.error("Error fetching hostels:", error);
+      toast.error("Failed to fetch hostels");
+    } finally {
+      setLoading(false);
+      setLoader(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      setDeleting(true);
+      setLoader(true);
+      const response = await fetch(`/api/delete-update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        // Update state by refetching hostels
+        await fetchMyHostels();
+        toast.success(data.message || "Hostel deleted successfully");
+      } else {
+        toast.error(data.message || "Failed to delete hostel");
+      }
+    } catch (error) {
+      console.error("Error deleting hostel:", error);
+      toast.error("Failed to delete hostel");
+    } finally {
+      setDeleting(false);
+      setLoader(false);
+    }
+  };
 
   useEffect(() => {
     setIsHydrated(true);
@@ -45,20 +96,6 @@ const MyHostelsPage = () => {
     }
 
     if (id) {
-      const fetchMyHostels = async () => {
-        try {
-          const res = await fetch(`/api/hostels?id=${id}`);
-          const data = await res.json();
-          if (data.success) {
-            setHostels(data.hostels);
-          }
-        } catch (error) {
-          console.error("Error fetching hostels:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
       fetchMyHostels();
     }
   }, [id, isHydrated, router]);
@@ -75,9 +112,14 @@ const MyHostelsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-rose-50 p-8">
+    <div className="min-h-screen bg-rose-50 p-4 sm:p-8">
+      {loader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/45">
+          <LoaderOne />
+        </div>
+      )}
       <motion.h1
-        className="text-3xl font-bold text-rose-700 mb-6 text-center"
+        className="text-2xl sm:text-3xl font-bold text-rose-700 mb-6 text-center"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -87,7 +129,7 @@ const MyHostelsPage = () => {
 
       {hostels.length === 0 ? (
         <motion.p
-          className="text-rose-500 text-center text-lg"
+          className="text-rose-500 text-center text-base sm:text-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -95,29 +137,29 @@ const MyHostelsPage = () => {
           You haven’t added any hostels yet.
         </motion.p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {hostels.map((hostel, index) => (
             <motion.div
               key={hostel._id}
               variants={cardVariants}
-              className="block sm:w-[90%] md:w-[90%] lg:w-[90%]"
+              className="block w-full sm:w-[90%] mx-auto"
               initial="hidden"
               animate="visible"
               whileHover="hover"
               transition={{ delay: index * 0.1 }}
             >
               <Card className="bg-white shadow-lg border border-rose-200 hover:shadow-xl transition-shadow duration-300">
-                <CardContent className="p-5 space-y-3">
-                  <h2 className="text-xl font-semibold text-rose-700">
+                <CardContent className="p-4 sm:p-5 space-y-3">
+                  <h2 className="text-lg sm:text-xl font-semibold text-rose-700">
                     {hostel.name}
                   </h2>
                   <p className="text-sm text-rose-500">
                     {hostel.address?.city}, {hostel.address?.state}
                   </p>
-                  <p className="text-lg font-medium text-rose-600">
+                  <p className="text-base sm:text-lg font-medium text-rose-600">
                     ₹{hostel.price}
                   </p>
-                  <p className="text-rose-600 line-clamp-2">
+                  <p className="text-rose-600 text-sm sm:text-base line-clamp-2">
                     {hostel.description}
                   </p>
 
@@ -134,9 +176,9 @@ const MyHostelsPage = () => {
                                 transition={{ delay: imgIndex * 0.2 }}
                               >
                                 <img
-                                  src={image}
+                                  src={image?.url}
                                   alt={`Hostel image ${imgIndex + 1}`}
-                                  className="w-full h-48 object-cover rounded-md"
+                                  className="w-full h-40 sm:h-48 object-cover rounded-md"
                                   onError={(e) => {
                                     e.currentTarget.src = "/fallback-image.jpg";
                                   }}
@@ -153,6 +195,17 @@ const MyHostelsPage = () => {
                     </div>
                   )}
                 </CardContent>
+                <div className="flex flex-col sm:flex-row w-full gap-2 justify-around p-4">
+                  <Button className="w-full sm:w-auto hover:bg-black">
+                    Update
+                  </Button>
+                  <Button
+                    className="w-full sm:w-auto hover:bg-black"
+                    onClick={() => handleDelete(hostel._id)}
+                  >
+                    {deleting ? "Deleting" : "Delete"}
+                  </Button>
+                </div>
               </Card>
             </motion.div>
           ))}

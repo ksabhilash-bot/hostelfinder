@@ -33,9 +33,11 @@ export default function CreateHostelPage() {
   const [message, setMessage] = useState("");
 
   // ✅ Upload multiple images
+  // ✅ Upload multiple images with proper error handling
   const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
     setLoader(true);
     setMessage("Uploading images...");
     const formData = new FormData();
@@ -51,14 +53,24 @@ export default function CreateHostelPage() {
       });
 
       const data = await res.json();
+      console.log("Upload response:", data); // Debug log to see the actual response
+
       if (data.success) {
-        setForm({ ...form, images: [...form.images, ...data.urls] });
-        setMessage("Images uploaded successfully!");
+        // The API returns 'images' array with objects { url, publicId }
+        const newImages = Array.isArray(data.images) ? data.images : [];
+
+        if (newImages.length > 0) {
+          // Store the full image objects (not just URLs) to match schema
+          setForm({ ...form, images: [...form.images, ...newImages] });
+          setMessage("Images uploaded successfully!");
+        } else {
+          setMessage("No valid image URLs returned");
+        }
       } else {
-        setMessage("Image upload failed");
+        setMessage(data.message || "Image upload failed");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Upload error:", error);
       setMessage("Error uploading images");
     } finally {
       setLoader(false);
@@ -83,6 +95,7 @@ export default function CreateHostelPage() {
     }
 
     setIsLoading(true);
+    setLoader(true);
     setMessage("");
 
     try {
@@ -121,6 +134,7 @@ export default function CreateHostelPage() {
       console.error(error);
       setMessage("An error occurred while creating the hostel");
     } finally {
+      setLoader(false);
       setIsLoading(false);
     }
   };
@@ -199,7 +213,7 @@ export default function CreateHostelPage() {
                       className="relative w-32 h-32 border rounded-lg overflow-hidden"
                     >
                       <img
-                        src={img}
+                        src={typeof img === "string" ? img : img.url}
                         alt="hostel"
                         className="w-full h-full object-cover"
                       />

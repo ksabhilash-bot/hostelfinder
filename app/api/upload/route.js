@@ -26,15 +26,17 @@ export async function POST(req) {
         cloudinary.uploader
           .upload_stream({ folder: "hostelfinder" }, (error, result) => {
             if (error) reject(error);
-            else resolve(result.secure_url);
+            else
+              resolve({ url: result.secure_url, publicId: result.public_id });
           })
           .end(buffer);
       });
     });
 
-    const urls = await Promise.all(uploadPromises);
+    const images = await Promise.all(uploadPromises);
 
-    return NextResponse.json({ success: true, urls });
+    const urls = images.map((img) => img.url);
+    return NextResponse.json({ success: true, urls, images });
   } catch (error) {
     console.error("Upload Error:", error);
     return NextResponse.json(

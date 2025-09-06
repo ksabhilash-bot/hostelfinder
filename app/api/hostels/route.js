@@ -37,17 +37,28 @@ export async function POST(req) {
 }
 
 // GET all hostels (optionally filter by provider)
+import mongoose from "mongoose";
+
 export async function GET(req) {
   try {
     await connectDB();
 
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("id"); // user _id
+    const userId = searchParams.get("id");
 
-    const query = userId ? { provider: userId } : {};
+    let query = {};
+    if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return NextResponse.json(
+          { success: false, message: "Invalid user ID" },
+          { status: 400 }
+        );
+      }
+      query.provider = new mongoose.Types.ObjectId(userId);
+    }
 
     const hostels = await Hostel.find(query)
-      .populate("provider", "name email image role") // now Mongoose knows the User schema
+      .populate("provider", "name email image role")
       .sort({ createdAt: -1 });
 
     return NextResponse.json(
@@ -57,7 +68,7 @@ export async function GET(req) {
   } catch (error) {
     console.error("Error fetching hostels:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch hostels" },
+      { success: false, message: error.message },
       { status: 500 }
     );
   }

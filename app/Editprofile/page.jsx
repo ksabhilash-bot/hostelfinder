@@ -119,11 +119,17 @@ const EditProfilePage = () => {
               </div>
             </div>
 
-            <div className="p-4">
+            <div className="p-4 flex flex-col  gap-5 items-center">
               <Link href="/hostels/create">
                 <Button className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-medium rounded-lg h-12 transition-all duration-200 transform hover:scale-[1.02]">
                   <Plus className="w-5 h-5 mr-2" />
-                  Add or Update Your Hostel
+                  Add Your Hostel
+                </Button>
+              </Link>
+              <Link href="/hostels/listhostels">
+                <Button className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-medium rounded-lg h-12 transition-all duration-200 transform hover:scale-[1.02]">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Update or Delete Your Hostel
                 </Button>
               </Link>
             </div>
