@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { auth, googleProvider } from "@/lib/firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { useUserStore } from "@/store/userStore";
@@ -13,12 +13,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Topbar = () => {
   const { uid, email, image, setUser, clearUser } = useUserStore();
+  const [loggin, setloggin] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
+      setloggin(true);
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
@@ -38,6 +42,7 @@ const Topbar = () => {
 
       if (data.success) {
         setUser({
+          id: data.user._id,
           uid: data.user.uid,
           name: data.user.name,
           email: data.user.email,
@@ -45,6 +50,7 @@ const Topbar = () => {
           image: data.user.image,
         });
       }
+      setloggin(false);
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -54,6 +60,7 @@ const Topbar = () => {
     try {
       await signOut(auth);
       clearUser();
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -81,17 +88,20 @@ const Topbar = () => {
               {uid ? (
                 <div className="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarImage src={image || "/default-avatar.png"} />
+                    <AvatarImage src={image} />
                     <AvatarFallback>
                       {email ? email[0].toUpperCase() : "?"}
                     </AvatarFallback>
                   </Avatar>
                   <Link href={`/Editprofile`}>
-                    <UserPen size={18} />
+                    <UserPen
+                      size={22}
+                      className="hover:text-rose-500 hover:scale-125 transition-transform duration-200"
+                    />
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-2 rounded-full hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105"
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-2 rounded-full hover:from-gray-600 hover:to-gray-800 transition-all transform hover:scale-105"
                   >
                     Sign Out
                   </button>
@@ -101,7 +111,7 @@ const Topbar = () => {
                   onClick={handleLogin}
                   className="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-6 py-2 rounded-full hover:from-rose-600 hover:to-pink-700 transition-all transform hover:scale-105"
                 >
-                  Sign In with Google
+                  {loggin ? "Please wait..." : "Sign In with Google"}
                 </button>
               )}
             </div>
@@ -111,7 +121,7 @@ const Topbar = () => {
               <Sheet>
                 <SheetTrigger asChild>
                   <button className="p-2 rounded-md hover:bg-gray-100">
-                    <Menu size={24} />
+                    <Menu className="hover:text-rose-500" size={24} />
                   </button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-64">
@@ -130,13 +140,16 @@ const Topbar = () => {
                       <p className="font-medium">{email}</p>
                       <button className="flex items-center gap-2 text-gray-700 hover:text-rose-600">
                         <Link href={`/Editprofile`}>
-                          <UserPen size={18} />
+                          <UserPen
+                            size={22}
+                            className="hover:text-rose-500 hover:scale-125 transition-transform duration-200"
+                          />
                         </Link>
                         Edit Profile
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-2 rounded-full hover:from-gray-600 hover:to-gray-700 transition-all"
+                        className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-2 rounded-full hover:from-gray-600 hover:to-gray-800 transition-all"
                       >
                         Sign Out
                       </button>

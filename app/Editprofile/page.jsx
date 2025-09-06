@@ -1,5 +1,6 @@
 "use client";
 
+import { Hotel, Plus, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,17 +12,21 @@ import {
 import React, { useEffect, useState } from "react";
 import { useUserStore } from "@/store/userStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 const EditProfilePage = () => {
-  const { email, role, setUser, image } = useUserStore();
+  const router = useRouter();
+  const { email, role, setUser, image, name, id } = useUserStore();
+
   const [selectedRole, setSelectedRole] = useState(role);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  console.log(email, role);
-
   // Fetch user data from API and load into Zustand
   useEffect(() => {
+    if (!id) {
+      router.push("/");
+    }
     const fetchUser = async () => {
       if (!email) return;
 
@@ -48,7 +53,7 @@ const EditProfilePage = () => {
     };
 
     fetchUser();
-  }, [email, setUser]);
+  }, [email, setUser, id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,34 +99,113 @@ const EditProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-rose-100 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-rose-500 to-rose-400 px-6 py-8 text-center">
-            <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <Avatar>
-                <AvatarImage src={image || "/default-avatar.png"} />
-                <AvatarFallback>
-                  {email ? email[0].toUpperCase() : "?"}
-                </AvatarFallback>
-              </Avatar>
+      <div className="w-full max-w-md space-y-6">
+        {/* Hostel Provider Quick Action */}
+        {role === "hostelprovider" && (
+          <div className="bg-white rounded-2xl shadow-lg border border-rose-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-rose-400 to-pink-400 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">
+                    Hostel Management
+                  </h3>
+                  <p className="text-rose-100 text-sm">
+                    Manage your property listings
+                  </p>
+                </div>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Edit Profile</h2>
-            <p className="text-rose-100 text-sm">
-              Update your account information
-            </p>
+
+            <div className="p-4">
+              <Link href="/hostels/create">
+                <Button className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-medium rounded-lg h-12 transition-all duration-200 transform hover:scale-[1.02]">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Add or Update Your Hostel
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Main Profile Card */}
+        <div
+          id="profile-form"
+          className="bg-white rounded-2xl shadow-xl border border-rose-100 overflow-hidden"
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-rose-500 to-rose-400 px-6 py-8 text-center relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-4 left-4 w-20 h-20 border border-white/30 rounded-full"></div>
+              <div className="absolute bottom-4 right-4 w-16 h-16 border border-white/20 rounded-full"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-white/10 rounded-full"></div>
+            </div>
+
+            <div className="relative z-10">
+              <div className="relative w-24 h-24 mx-auto mb-4">
+                <div className="w-full h-full bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30 shadow-lg overflow-hidden">
+                  <Avatar className="w-full h-full">
+                    <AvatarImage
+                      src={image || "/default-avatar.png"}
+                      alt={name || "Profile"}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-white/90 text-rose-600 text-xl font-bold">
+                      {email ? email[0].toUpperCase() : "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                {/* Online status indicator */}
+                <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-400 rounded-full border-3 border-white shadow-md"></div>
+              </div>
+
+              {name && (
+                <h3 className="text-xl font-semibold text-white mb-1">
+                  {name}
+                </h3>
+              )}
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Edit Profile
+              </h2>
+              <p className="text-rose-100 text-sm">
+                Update your account information
+              </p>
+            </div>
           </div>
 
           {/* Form Content */}
           <div className="p-6">
-            {/* User Email Display */}
+            {/* User Info Display */}
             {email && (
               <div className="mb-6 p-4 bg-rose-50 rounded-lg border border-rose-100">
-                <p className="text-sm text-rose-600 font-medium mb-1">
-                  Current Email
-                </p>
-                <p className="text-rose-800 font-semibold">{email}</p>
+                <div className="flex items-center gap-4">
+                  {/* Small profile image */}
+                  <div className="w-12 h-12 flex-shrink-0">
+                    <Avatar className="w-full h-full border-2 border-rose-200">
+                      <AvatarImage
+                        src={image || "/default-avatar.png"}
+                        alt={name || "Profile"}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-rose-200 text-rose-600 font-semibold">
+                        {email ? email[0].toUpperCase() : "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+
+                  <div className="flex-grow">
+                    <p className="text-sm text-rose-600 font-medium mb-1">
+                      Current Email
+                    </p>
+                    <p className="text-rose-800 font-semibold">{email}</p>
+                    {name && (
+                      <p className="text-rose-600 text-sm mt-1">{name}</p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -194,7 +278,7 @@ const EditProfilePage = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6">
+        <div className="text-center">
           <p className="text-sm text-gray-500">
             Need help? Contact support for assistance.
           </p>
