@@ -10,25 +10,40 @@ const MyHostelsPage = () => {
   const { id } = useUserStore(); // ✅ you store _id as id in zustand
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false); // Track store hydration
   const router = useRouter();
 
   useEffect(() => {
-    const fetchMyHostels = async () => {
-      try {
-        const res = await fetch(`/api/hostels?id=${id}`);
-        const data = await res.json();
-        if (data.success) {
-          setHostels(data.hostels);
-        }
-      } catch (error) {
-        console.error("Error fetching hostels:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Mark hydration as complete after the initial render
+    setIsHydrated(true);
+  }, []);
 
-    fetchMyHostels();
-  }, [id]);
+  useEffect(() => {
+    // Only check for redirection after the store is hydrated
+    if (isHydrated && !id) {
+      router.push("/");
+      return;
+    }
+
+    // Proceed with fetching only if id exists
+    if (id) {
+      const fetchMyHostels = async () => {
+        try {
+          const res = await fetch(`/api/hostels?id=${id}`);
+          const data = await res.json();
+          if (data.success) {
+            setHostels(data.hostels);
+          }
+        } catch (error) {
+          console.error("Error fetching hostels:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchMyHostels();
+    }
+  }, [id, isHydrated, router]);
 
   if (loading) {
     return (
