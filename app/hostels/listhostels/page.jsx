@@ -13,10 +13,6 @@ const MyHostelsPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!id) {
-      router.push("/");
-    }
-
     const fetchMyHostels = async () => {
       try {
         const res = await fetch(`/api/hostels?id=${id}`);
