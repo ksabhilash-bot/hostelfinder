@@ -140,6 +140,17 @@ const EditProfilePage = () => {
           </div>
         )}
 
+        {
+          role ==="normaluser" && (
+            <div className="bg-white rounded-2xl shadow-lg border border-rose-100 overflow-hidden">
+              <div className="">
+
+              </div>
+
+            </div>
+          )
+        }
+
         <div
           id="profile-form"
           className="bg-white rounded-2xl shadow-xl border border-rose-100 overflow-hidden"

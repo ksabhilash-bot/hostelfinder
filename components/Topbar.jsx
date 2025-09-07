@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchStore } from "@/store/useSearchStore";
 
 const Topbar = () => {
   const { uid, email, image, setUser, clearUser } = useUserStore();
+  const { clearStorage } = useSearchStore();
   const [loggin, setloggin] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false); // State to control Sheet
   const router = useRouter();
@@ -61,6 +63,7 @@ const Topbar = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      clearStorage();
       clearUser();
       router.push("/");
       setIsSheetOpen(false); // Close Sheet after logout

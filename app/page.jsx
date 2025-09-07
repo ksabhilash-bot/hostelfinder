@@ -1,20 +1,11 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Search,
-  MapPin,
-  Users,
-  Star,
-  Wifi,
-  Car,
-  Coffee,
-  Shield,
-  ArrowRight,
-  Calendar,
-  Filter,
-} from "lucide-react";
+import { Search, MapPin, Star, Shield, ArrowRight } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRouter } from "next/navigation";
+import { useSearchStore } from "@/store/useSearchStore"; // Adjust path as needed
+import { toast } from "sonner";
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
@@ -23,6 +14,9 @@ if (typeof window !== "undefined") {
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  const { setSearchResults } = useSearchStore();
+  const [search, setSearch] = useState(false);
 
   // Refs for GSAP animations
   const heroRef = useRef(null);
@@ -160,6 +154,41 @@ export default function Home() {
     };
   }, []);
 
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      toast("Please enter a search query");
+      return;
+    }
+
+    try {
+      setSearch(true);
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(searchQuery)}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast(errorData.message || "Search failed");
+        return;
+      }
+
+      const data = await response.json();
+      setSearchResults(data.hostels || []);
+      router.push("/hostel");
+    } catch (error) {
+      console.error("Search error:", error);
+      toast("An error occurred during search");
+    } finally {
+      setSearch(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   const featuredHostels = [
     {
       id: 1,
@@ -262,14 +291,19 @@ export default function Home() {
                     className="bg-transparent w-full focus:outline-none"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
                   />
                 </div>
               </div>
 
               <div className="flex items-center">
-                <button className="w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white py-3 px-6 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all flex items-center justify-center space-x-2">
+                <button
+                  disabled={search}
+                  onClick={handleSearch}
+                  className={` w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white py-3 px-6 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all flex items-center justify-center space-x-2`}
+                >
                   <Search className="w-5 h-5" />
-                  <span>Search</span>
+                  <span>{search ? "searching" : "search"}</span>
                 </button>
               </div>
             </div>
