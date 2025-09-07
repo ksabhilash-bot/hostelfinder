@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { LoaderOne } from "@/components/ui/loader";
 
 export default function CreateHostelPage() {
-  const { id } = useUserStore();
+  const { id, role } = useUserStore();
   const router = useRouter();
   const [loader, setLoader] = useState(false);
 
@@ -53,7 +53,6 @@ export default function CreateHostelPage() {
       });
 
       const data = await res.json();
-      console.log("Upload response:", data); // Debug log to see the actual response
 
       if (data.success) {
         // The API returns 'images' array with objects { url, publicId }
@@ -127,6 +126,7 @@ export default function CreateHostelPage() {
         setTimeout(() => {
           router.push("/hostels/listhostels");
         }, 2000);
+        setLoader(false);
       } else {
         setMessage(data.message || "Failed to create hostel");
       }
@@ -134,7 +134,6 @@ export default function CreateHostelPage() {
       console.error(error);
       setMessage("An error occurred while creating the hostel");
     } finally {
-      setLoader(false);
       setIsLoading(false);
     }
   };

@@ -31,7 +31,7 @@ const carouselItemVariants = {
 };
 
 const MyHostelsPage = () => {
-  const { id } = useUserStore();
+  const { id, role } = useUserStore();
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -40,6 +40,11 @@ const MyHostelsPage = () => {
   const [loader, setLoader] = useState(false);
 
   // Function to fetch hostels
+  const updatePage = (id) => {
+    setLoader(true);
+    router.push(`/hostels/update/${id}`);
+  };
+
   const fetchMyHostels = async () => {
     try {
       setLoader(true);
@@ -58,6 +63,11 @@ const MyHostelsPage = () => {
       setLoader(false);
     }
   };
+
+  useEffect(() => {
+    // Whenever route changes, turn off loader
+    setLoader(false);
+  }, [router]);
 
   const handleDelete = async (id) => {
     try {
@@ -90,7 +100,7 @@ const MyHostelsPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isHydrated && !id) {
+    if (isHydrated && (!id || role !== "hostelprovider")) {
       router.push("/");
       return;
     }
@@ -98,7 +108,7 @@ const MyHostelsPage = () => {
     if (id) {
       fetchMyHostels();
     }
-  }, [id, isHydrated, router]);
+  }, [id, isHydrated, router, role]);
 
   if (loading) {
     return (
@@ -196,7 +206,12 @@ const MyHostelsPage = () => {
                   )}
                 </CardContent>
                 <div className="flex flex-col sm:flex-row w-full gap-2 justify-around p-4">
-                  <Button className="w-full sm:w-auto hover:bg-black">
+                  <Button
+                    className="w-full sm:w-auto hover:bg-black "
+                    onClick={() => {
+                      updatePage(hostel._id);
+                    }}
+                  >
                     Update
                   </Button>
                   <Button
