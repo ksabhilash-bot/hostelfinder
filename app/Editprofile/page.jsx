@@ -17,14 +17,18 @@ import { useRouter } from "next/navigation";
 const EditProfilePage = () => {
   const router = useRouter();
   const { email, role, setUser, image, name, id } = useUserStore();
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const [selectedRole, setSelectedRole] = useState(role);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Fetch user data from API and load into Zustand
   useEffect(() => {
-    if (!id) {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (isHydrated && !id) {
       router.push("/");
     }
     const fetchUser = async () => {
@@ -53,7 +57,7 @@ const EditProfilePage = () => {
     };
 
     fetchUser();
-  }, [email, setUser, id]);
+  }, [email, setUser, id, isHydrated, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,14 +140,11 @@ const EditProfilePage = () => {
           </div>
         )}
 
-        {/* Main Profile Card */}
         <div
           id="profile-form"
           className="bg-white rounded-2xl shadow-xl border border-rose-100 overflow-hidden"
         >
-          {/* Header */}
           <div className="bg-gradient-to-r from-rose-500 to-rose-400 px-6 py-8 text-center relative overflow-hidden">
-            {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-4 left-4 w-20 h-20 border border-white/30 rounded-full"></div>
               <div className="absolute bottom-4 right-4 w-16 h-16 border border-white/20 rounded-full"></div>
@@ -202,13 +203,17 @@ const EditProfilePage = () => {
                     </Avatar>
                   </div>
 
-                  <div className="flex-grow">
+                  <div className="flex-grow min-w-0">
                     <p className="text-sm text-rose-600 font-medium mb-1">
                       Current Email
                     </p>
-                    <p className="text-rose-800 font-semibold">{email}</p>
+                    <p className="text-rose-800 text-sm font-semibold truncate">
+                      {email}
+                    </p>
                     {name && (
-                      <p className="text-rose-600 text-sm mt-1">{name}</p>
+                      <p className="text-rose-600 text-sm mt-1 truncate">
+                        {name}
+                      </p>
                     )}
                   </div>
                 </div>

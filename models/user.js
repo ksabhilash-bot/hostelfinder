@@ -28,8 +28,4 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-// Add indexes for better performance
-UserSchema.index({ uid: 1 });
-UserSchema.index({ email: 1 });
-
 export default models.User || model("User", UserSchema);
