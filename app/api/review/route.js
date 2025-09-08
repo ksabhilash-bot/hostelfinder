@@ -128,11 +128,12 @@ export async function DELETE(request) {
   }
 }
 
-export async function GET(request, { params }) {
+export async function GET(req) {
   try {
     await connectDB();
 
-    const { hostelId } = params;
+    const url = new URL(req.url);
+    const hostelId = url.searchParams.get("hostelId");
 
     if (!hostelId) {
       return NextResponse.json(

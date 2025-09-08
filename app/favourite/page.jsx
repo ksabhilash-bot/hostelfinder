@@ -17,6 +17,10 @@ const Page = () => {
   const [loadingFavorites, setLoadingFavorites] = useState({});
   const [after, setIsAfter] = useState(false);
 
+  const detailed = (id) => {
+    router.push(`/detail/${id}`);
+  };
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -317,7 +321,7 @@ const Page = () => {
                         </span>
                       </div>
                       <Button
-                        onClick={() => toast.info("Feature coming soon!")}
+                        onClick={() => detailed(hostel._id)}
                         className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-xs md:text-sm"
                         size="sm"
                       >

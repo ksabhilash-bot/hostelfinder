@@ -27,14 +27,12 @@ const Page = () => {
   useEffect(() => {
     setIsHydrated(true);
 
-    // Initialize image indexes for each hostel
     const initialIndexes = {};
     searchResults.forEach((hostel, index) => {
       initialIndexes[index] = 0;
     });
     setCurrentImageIndexes(initialIndexes);
 
-    // Fetch user's favorites if user is logged in
     if (id) {
       fetchUserFavorites();
     }
@@ -81,6 +79,7 @@ const Page = () => {
         if (isFavorite) {
           // Remove from favorites
           setFavorites((prev) => prev.filter((fav) => fav !== hostelId));
+          c;
           toast.success("Removed from favorites");
         } else {
           // Add to favorites
@@ -115,6 +114,10 @@ const Page = () => {
         [hostelIndex]: newIndex,
       };
     });
+  };
+
+  const detailed = (id) => {
+    router.push(`/detail/${id}`);
   };
 
   if (!hydrated) {
@@ -318,7 +321,9 @@ const Page = () => {
                         <span className="text-gray-500 text-sm">/Month</span>
                       </div>
                       <Button
-                        onClick={() => toast.info("Feature coming soon!")}
+                        onClick={() => {
+                          detailed(hostel._id);
+                        }}
                         className="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700"
                       >
                         View Details
