@@ -4,7 +4,15 @@ import React, { use, useEffect, useState } from "react";
 import { LoaderOne } from "@/components/ui/loader";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Star, Trash2, User, Calendar } from "lucide-react";
+import {
+  Star,
+  Trash2,
+  User,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+} from "lucide-react";
 
 const page = ({ params: paramsPromise }) => {
   const { id: userId, user } = useUserStore();
@@ -19,14 +27,26 @@ const page = ({ params: paramsPromise }) => {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(null);
   const router = useRouter();
-  console.log(hostel);
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [formData, setFormData] = useState({
     userId: "",
     hostelId: "",
     rating: 0,
     comment: "",
   });
+
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === hostel.images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? hostel.images.length - 1 : prevIndex - 1
+    );
+  };
 
   const [hoverRating, setHoverRating] = useState(0);
 
@@ -36,6 +56,7 @@ const page = ({ params: paramsPromise }) => {
 
   useEffect(() => {
     if (!userId && isHydrated) {
+      toast("Please Login and come back!");
       router.push("/");
     }
   }, [router, userId, isHydrated]);
@@ -204,14 +225,75 @@ const page = ({ params: paramsPromise }) => {
         {/* Hostel Header */}
         {hostel && (
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+            {/* Image Carousel */}
+            {hostel.images && hostel.images.length > 0 && (
+              <div className="relative mb-6 rounded-lg overflow-hidden h-64">
+                <img
+                  src={hostel.images[currentImageIndex].url}
+                  alt={`Hostel image ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                />
+
+                {/* Navigation arrows */}
+                {hostel.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+
+                {/* Image indicators */}
+                {hostel.images.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                    {hostel.images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`w-3 h-3 rounded-full ${
+                          index === currentImageIndex
+                            ? "bg-white"
+                            : "bg-gray-400"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="flex-1">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                   {hostel.name}
                 </h1>
-                <p className="text-gray-600 mt-1">{hostel.state}</p>
-                <p className="text-gray-600 mt-1">{hostel.city}</p>
-                <p className="text-gray-600 mt-1">{hostel.street}</p>
+
+                {/* Hostel address */}
+                <div className="flex items-center text-gray-600 mb-2">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  <span>
+                    {hostel.address.street}, {hostel.address.city},{" "}
+                    {hostel.address.district}, {hostel.address.state},{" "}
+                    {hostel.address.country}
+                  </span>
+                </div>
+
+                {/* Hostel description */}
+                <p className="text-gray-700 mb-3">{hostel.description}</p>
+
+                {/* Hostel price */}
+                <p className="text-xl font-semibold text-blue-600">
+                  ₹{hostel.price}/month
+                </p>
               </div>
               <div className="text-center md:text-right">
                 <div className="flex items-center justify-center md:justify-end gap-2 mb-1">
