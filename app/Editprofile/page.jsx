@@ -1,6 +1,6 @@
 "use client";
 
-import { Hotel, Plus, Building2 } from "lucide-react";
+import { Hotel, Plus, Building2, HeartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -18,10 +18,11 @@ const EditProfilePage = () => {
   const router = useRouter();
   const { email, role, setUser, image, name, id } = useUserStore();
   const [isHydrated, setIsHydrated] = useState(false);
-
+  const [isupdate, setIsUpdating] = useState(false);
   const [selectedRole, setSelectedRole] = useState(role);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [routing, setRouting] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -64,7 +65,7 @@ const EditProfilePage = () => {
 
     if (!email) return;
 
-    setIsLoading(true);
+    setIsUpdating(true);
     setMessage("");
 
     try {
@@ -97,8 +98,14 @@ const EditProfilePage = () => {
     } catch (error) {
       setMessage("An error occurred while updating");
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
+  };
+
+  const favouriteroute = () => {
+    setRouting(true);
+    router.push("/favourite");
+    setRouting(false);
   };
 
   return (
@@ -140,16 +147,22 @@ const EditProfilePage = () => {
           </div>
         )}
 
-        {
-          role ==="normaluser" && (
-            <div className="bg-white rounded-2xl shadow-lg border border-rose-100 overflow-hidden">
-              <div className="">
-
-              </div>
-
+        {role === "normaluser" && (
+          <div className="bg-white rounded-2xl shadow-lg border border-rose-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-rose-400 to-pink-400 px-6 py-4 flex flex-col">
+              <Button
+                disabled={routing}
+                className={`bg-rose-500 hover:bg-black`}
+                onClick={favouriteroute}
+              >
+                <span className="font-semibold ">
+                  {routing ? "Please wait" : "Your Favourite"}
+                </span>
+                <HeartIcon size={22} />
+              </Button>
             </div>
-          )
-        }
+          </div>
+        )}
 
         <div
           id="profile-form"
@@ -289,10 +302,10 @@ const EditProfilePage = () => {
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                    Updating...
+                    Loading...
                   </div>
                 ) : (
-                  "Update Profile"
+                  <span>{isupdate ? "Updating.." : "Update"}</span>
                 )}
               </Button>
             </form>
